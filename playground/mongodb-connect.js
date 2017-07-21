@@ -13,30 +13,29 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   }
   console.log('Connected to MongoDB server')
 
-  // db.collection('Todos').insertOne({
-  //   text: 'Some text',
-  //   completed: false
-  //
-  // },(err, result) => {
-  //   if (err) console.log('Unable to insert todo', err)
-  //
-  //   // result.ops is gonna store all the docs we inserted.
-  //   // in this case .ops = .insertOne
-  //   console.log(JSON.stringify(result.ops, undefined, 2))
-  // })
+  db.collection('Todos').insertOne({
+    text: 'eat dinner',
+    completed: false
 
-  // db.collection('Users').insertOne({
-  //   name: 'Simi',
-  //   age: 26,
-  //   location: 'Stadi'
-  //
-  // }, (err, result) => {
-  //   if (err) console.log('Unable to insert User', err)
-  //
-  //   console.log(JSON.stringify(result.ops, undefined, 2))
-  //
-  //   console.log(result.ops[0]._id.getTimestamp())
-  // })
+  },(err, result) => {
+    if (err) console.log('Unable to insert todo', err)
+
+    // result.ops is gonna store all the docs we inserted.
+    // in this case .ops = .insertOne
+    console.log(JSON.stringify(result.ops, undefined, 2))
+  })
+
+  db.collection('Users').insertOne({
+    name: 'Simi',
+    age: 26,
+    location: 'Stadi'
+  }, (err, result) => {
+    if (err) console.log('Unable to insert User', err)
+
+    console.log(JSON.stringify(result.ops, undefined, 2))
+
+    console.log(result.ops[0]._id.getTimestamp())
+  })
 
   db.close()
 })
