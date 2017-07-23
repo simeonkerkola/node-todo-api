@@ -3,8 +3,8 @@ var mongoose = require('mongoose')
 // making a mongoose model
 var Todo = mongoose.model('Todo', {
   text: {
-    type: String,
-    required: true,  // mongoose validators
+    type: String,   // mongoose validators
+    required: true,
     minlength: 1,
     trim: true
   },
