@@ -18,6 +18,7 @@
     "mongoose": "^4.10.8"
   },
   "devDependencies": {
+    "express": "^4.15.3",
     "expect": "^1.20.2",
     "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
