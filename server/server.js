@@ -53,10 +53,10 @@ app.delete('/todos/:id', (req, res) => {
   // remove todo by id
   Todo.findByIdAndRemove(id).then((todo) => {
     // if doc no deleted send 404
-    if(!todo) res.status(400).send()
+    if(!todo) res.status(404).send()
 
     // if deleted send back doc with 200
-    res.send(todo)
+    res.send({todo})
   }).catch((e) => res.status(400).send())
 })
 
