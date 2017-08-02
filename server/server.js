@@ -30,7 +30,7 @@ app.get('/todos', (req, res) => {
 
 // GET /todos/12345
 app.get('/todos/:id', (req, res) => {
-  var id = req.params.id
+  let id = req.params.id
 
   // Valid id using isValid
     // if not found res 404 - send back empty body
@@ -39,17 +39,27 @@ app.get('/todos/:id', (req, res) => {
   // findById
   Todo.findById(id).then((todo) => {
     // if no todo - send back 404 with empty body
-    if (!todo) res.status(404).send()
-    // success
-    // if todo - send it back
+    if (!todo) res.status(404).send() // success
     res.send({todo})
-
-    // error
-      // 400 - and send empty body back
-  }).catch((e) => res.status(400).send())
-
-
+  }).catch((e) => res.status(400).send()) // error 400 - send empty body back
 })
+
+app.delete('/todos/:id', (req, res) => {
+  // get the id
+  let id = req.params.id
+  // validate the id, if not -> 404
+  if (!ObjectID.isValid(id)) res.status(404).send()
+
+  // remove todo by id
+  Todo.findByIdAndRemove(id).then((todo) => {
+    // if doc no deleted send 404
+    if(!todo) res.status(400).send()
+
+    // if deleted send back doc with 200
+    res.send(todo)
+  }).catch((e) => res.status(400).send())
+})
+
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`)
