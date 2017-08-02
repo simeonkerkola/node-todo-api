@@ -1,18 +1,19 @@
-var express = require('express')
-var bodyParser = require('body-parser')
+const _ = require('lodash')
+const express = require('express')
+const bodyParser = require('body-parser')
 const {ObjectID} = require('mongodb')
 
-var {mongoose} = require('./db/mongoose')
-var {Todo} = require('./models/todo')
-var {User} = require('./models/user')
+const {mongoose} = require('./db/mongoose')
+const {Todo} = require('./models/todo')
+const {User} = require('./models/user')
 
-var app = express()
+const app = express()
 const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 
 app.post('/todos', (req, res) => {
-  var todo = new Todo({
+  const todo = new Todo({
     text: req.body.text
   })
 
@@ -30,7 +31,7 @@ app.get('/todos', (req, res) => {
 
 // GET /todos/12345
 app.get('/todos/:id', (req, res) => {
-  let id = req.params.id
+  const id = req.params.id
 
   // Valid id using isValid
     // if not found res 404 - send back empty body
@@ -46,7 +47,7 @@ app.get('/todos/:id', (req, res) => {
 
 app.delete('/todos/:id', (req, res) => {
   // get the id
-  let id = req.params.id
+  const id = req.params.id
   // validate the id, if not -> 404
   if (!ObjectID.isValid(id)) res.status(404).send()
 
@@ -60,6 +61,29 @@ app.delete('/todos/:id', (req, res) => {
   }).catch((e) => res.status(400).send())
 })
 
+// update
+app.patch('/todos/:id', (req, res) => {
+  const id = req.params.id
+
+  // picks these two arguments and only if they exist
+  const body = _.pick(req.body, ['text', 'completed'])
+
+  if (!ObjectID.isValid(id)) return res.status(404).send()
+
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime()
+  } else {
+    body.completed = false
+    body.completedAt = null
+  }
+
+  // check mongo-update about mongo operators
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    if (!todo) return res.status(404).send()
+
+    res.send({todo})
+  }).catch(e => res.status(400).send())
+})
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`)
