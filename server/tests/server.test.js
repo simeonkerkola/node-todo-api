@@ -149,7 +149,7 @@ describe('PATCH /todos/:id', () => {
 
     // grab id of the first item
     const hexId = todos[0]._id.toHexString()
-    const text = 'Feed my fish'
+    const text = 'This should be the new text'
 
     // update text, set completed to true
     request(app)
@@ -171,7 +171,7 @@ describe('PATCH /todos/:id', () => {
   it('should clear completedAt when todo is not completed', (done) => {
     // grab id of second todo item
     const hexId = todos[1]._id.toHexString()
-    const text = 'Eat my fish'
+    const text = 'Feed my fish'
     // update text, set completed to false
     request(app)
       .patch(`/todos/${hexId}`)
