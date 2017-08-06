@@ -28,7 +28,7 @@ app.get('/todos', (req, res) => {
   Todo.find() // returns everything
   .then((todos) => {
     res.send({todos})
-  }, (e) => res.status(400).send)
+  }, (e) => res.status(400).send())
 })
 
 // GET /todos/12345
@@ -86,6 +86,22 @@ app.patch('/todos/:id', (req, res) => {
     res.send({todo})
   }).catch(e => res.status(400).send())
 })
+
+
+// POST /users
+
+  app.post('/users', (req, res) => {
+    // pick only email and password
+    const body = _.pick(req.body, ['email', 'password'])
+
+    debugger
+
+    const user = new User(body)
+    user.save().then((user) => {
+      res.send(user)
+    }).catch( e => res.status(400).send(e))
+  })
+
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`)
