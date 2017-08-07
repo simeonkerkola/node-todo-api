@@ -1,19 +1,9 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const jwt = require('jsonwebtoken')
+const _ = require('lodash')
 
-
-// {
-//   email: 'example@example.com',
-//   password: 'assddf45sd0fg87hd23fghdf',
-//   tokens: [{
-//     access: 'auth',
-//     token: 'sdfrghyfljhe43iutkjfqo93iu5iw'
-//   }]
-// }
-
-// User
-// email - required, trim, type, set min length, only unique emails
-var User = mongoose.model('User', {
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -22,7 +12,7 @@ var User = mongoose.model('User', {
     unique: true,
     validate: {
       validator: validator.isEmail,
-      message: '{VALUE} is not a valid email'
+      message: '{VALUE} is not a vali d email'
     }
   },
   password: {
@@ -41,5 +31,32 @@ var User = mongoose.model('User', {
     }
   }]
 })
+
+// this method determines what exactly gets send back when mongoose model is
+// converted to JSON value
+UserSchema.methods.toJSON = function () {
+  const user = this
+  var userObject = user.toObject()
+
+  // leaving off password and tokens array whick should not be returned
+  return _.pick(userObject, ['_id', 'email'])
+}
+
+// arrow functions do not bind this keyword
+UserSchema.methods.generateAuthToken = function () {
+  const user = this
+  var access = 'auth'
+  var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString()
+
+  user.tokens.push({access, token})
+
+  return user.save().then(() => {
+    return token
+  })
+}
+
+// User
+// email - required, trim, type, set min length, only unique emails
+var User = mongoose.model('User', UserSchema)
 
 module.exports = {User}
