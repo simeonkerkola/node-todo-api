@@ -44,6 +44,7 @@ UserSchema.methods.toJSON = function () {
 
 // arrow functions do not bind this keyword
 UserSchema.methods.generateAuthToken = function () {
+  // instance methods get called with individual document
   const user = this
   var access = 'auth'
   var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString()
@@ -52,6 +53,26 @@ UserSchema.methods.generateAuthToken = function () {
 
   return user.save().then(() => {
     return token
+  })
+}
+
+// everything added to a statics turns into a model method as opposed to a instance method
+UserSchema.statics.findByToken = function (token) {
+  // model methods get called with the model as the this binding
+  const User = this
+  let decoded
+
+  try {
+    decoded = jwt.verify(token, 'abc123')
+  } catch (e) {
+    return Promise.reject()
+    }
+
+  // to query a netsted document (.dot), wrap a value in quotes
+  return User.findOne({
+    _id: decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
   })
 }
 
