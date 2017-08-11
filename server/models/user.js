@@ -48,9 +48,15 @@ UserSchema.methods.generateAuthToken = function () {
   // instance methods get called with individual document
   const user = this
   var access = 'auth'
-  var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString()
+  var token = jwt.sign({
+    _id: user._id.toHexString(),
+    access
+  }, 'abc123').toString()
 
-  user.tokens.push({access, token})
+  user.tokens.push({
+    access,
+    token
+  })
 
   return user.save().then(() => {
     return token
@@ -67,13 +73,29 @@ UserSchema.statics.findByToken = function (token) {
     decoded = jwt.verify(token, 'abc123')
   } catch (e) {
     return Promise.reject()
-    }
+  }
 
   // to query a netsted document (.dot), wrap a value in quotes
   return User.findOne({
     _id: decoded._id,
     'tokens.token': token,
     'tokens.access': 'auth'
+  })
+}
+
+UserSchema.statics.findByCredentials = function (email, password) {
+  const User = this
+
+  return User.findOne({email}).then((user) => {
+    if (!user) return Promise.reject()
+
+    return new Promise((resolve, reject) => {
+      // Use bcrypt.compare to compare password and user.password
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (res) resolve(user) // if true call user
+        else reject()// if false call reject          
+      })
+    })
   })
 }
 
@@ -99,4 +121,6 @@ UserSchema.pre('save', function (next) {
 // email - required, trim, type, set min length, only unique emails
 var User = mongoose.model('User', UserSchema)
 
-module.exports = {User}
+module.exports = {
+  User
+}
