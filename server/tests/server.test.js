@@ -1,12 +1,12 @@
 const _ = require('lodash')
 const expect = require('expect')
 const request = require('supertest')
-const {ObjectID} = require('mongodb')
+const { ObjectID } = require('mongodb')
 
-const {app} = require('./../server')
-const {Todo} = require('./../models/todo')
-const {User} = require('./../models/user')
-const {todos, populateTodos, users, populateUsers} = require('./seed/seed')
+const { app } = require('./../server')
+const { Todo } = require('./../models/todo')
+const { User } = require('./../models/user')
+const { todos, populateTodos, users, populateUsers } = require('./seed/seed')
 
 
 // clears database before each test case
@@ -15,39 +15,39 @@ beforeEach(populateTodos)
 
 describe('POST /todos', () => {
   it('should create a new todo', (done) => {
-    var text = 'Test todo text'
+    const text = 'Test todo text'
 
     request(app)
       .post('/todos')
-      .send({text})   // sending text
+      .send({ text }) // sending text
       .expect(200)
       .expect((res) => {
         expect(res.body.text).toBe(text)
-    })
-    .end((err, res) =>{
-      if (err) done(err)
+      })
+      .end((err, res) => {
+        if (err) done(err)
 
-      Todo.find({text}).then((todos) => {
-        expect(todos.length).toBe(1)
-        expect(todos[0].text).toBe(text)
-        done()
-      }).catch((e) => done (e))
-    })
+        Todo.find({ text }).then((todos) => {
+          expect(todos.length).toBe(1)
+          expect(todos[0].text).toBe(text)
+          done()
+        }).catch(e => done(e))
+      })
   })
 
   it('should not create todo with invalid body data', (done) => {
     request(app)
-    .post('/todos')
-    .send({})     // send empty data
-    .expect(400)
-    .end((err, res) => {
-      if (err) done(err)
+      .post('/todos')
+      .send({}) // send empty data
+      .expect(400)
+      .end((err, res) => {
+        if (err) done(err)
 
-      Todo.find().then((todos) => {
-        expect(todos.length).toBe(2)
-        done()
-      }).catch((e) => done(e))
-    })
+        Todo.find().then((todos) => {
+          expect(todos.length).toBe(2)
+          done()
+        }).catch(e => done(e))
+      })
   })
 })
 
@@ -71,25 +71,25 @@ describe('GET /todos/:id', () => {
       .expect((res) => {
         expect(res.body.todo.text).toBe(todos[0].text)
       })
-    .end(done)
+      .end(done)
   })
 
   it('should return 404 if todo not found', (done) => {
-    var hexId = new ObjectID().toHexString()
+    let hexId = new ObjectID().toHexString()
 
     // make sure you get 404 back
     request(app)
       .get(`/todos/${hexId}`)
       .expect(404)
-    .end(done)
+      .end(done)
   })
 
   it('should return 404 for non-object ids', (done) => {
     // /todos/123 should fail
     request(app)
-      .get(`/todos/123abc`)
+      .get('/todos/123abc')
       .expect(404)
-    .end(done)
+      .end(done)
   })
 })
 
@@ -103,40 +103,39 @@ describe('DELETE /todos/:id', () => {
       .expect((res) => {
         expect(res.body.todo._id).toBe(hexId)
       })
-    .end((err, res) => {
-      if (err) return done(err)
+      .end((err, res) => {
+        if (err) return done(err)
 
-      // query database using findById toNotExist
-      // expect(null).toNotExist()
+        // query database using findById toNotExist
+        // expect(null).toNotExist()
 
-      Todo.findById(hexId).then((todo) => {
-        expect(todo).toNotExist()
-        done()
-      }).catch( e => done(e))
-    })
+        Todo.findById(hexId).then((todo) => {
+          expect(todo).toNotExist()
+          done()
+        }).catch(e => done(e))
+      })
   })
 
   it('should return 404 if todo not found', (done) => {
-    var hexId = new ObjectID().toHexString()
+    let hexId = new ObjectID().toHexString()
 
     // make sure you get 404 back
     request(app)
       .delete(`/todos/${hexId}`)
       .expect(404)
-    .end(done)
+      .end(done)
   })
 
   it('should return 404 if object id is invalid', (done) => {
     request(app)
       .delete('/todos/someNotValidId')
       .expect(404)
-    .end(done)
+      .end(done)
   })
 })
 
 describe('PATCH /todos/:id', () => {
   it('should update the todo', (done) => {
-
     // grab id of the first item
     const hexId = todos[0]._id.toHexString()
     const text = 'This should be the new text'
@@ -146,7 +145,7 @@ describe('PATCH /todos/:id', () => {
       .patch(`/todos/${hexId}`)
       .send({
         completed: true,
-        text
+        text,
       })
       .expect(200)// expect 200
       // expect text is changed, completed is true, completedAt is a number .toBeA
@@ -155,7 +154,7 @@ describe('PATCH /todos/:id', () => {
         expect(res.body.todo.completed).toBe(true)
         expect(res.body.todo.completedAt).toBeA('number')
       })
-    .end(done)
+      .end(done)
   })
 
   it('should clear completedAt when todo is not completed', (done) => {
@@ -167,17 +166,17 @@ describe('PATCH /todos/:id', () => {
       .patch(`/todos/${hexId}`)
       .send({
         completed: false,
-        text
+        text,
       })
     // 200
-    .expect(200)
+      .expect(200)
     // text is changed, completed false, completedAt is null .toNotExist
-    .expect((res) => {
-      expect(res.body.todo.text).toBe(text)
-      expect(res.body.todo.completed).toBe(false)
-      expect(res.body.todo.completedAt).toNotExist()
-    })
-    .end(done)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(text)
+        expect(res.body.todo.completed).toBe(false)
+        expect(res.body.todo.completedAt).toNotExist()
+      })
+      .end(done)
   })
 })
 
@@ -213,7 +212,7 @@ describe('POST /users', () => {
 
     request(app)
       .post('/users')
-      .send({email, password})
+      .send({ email, password })
       .expect(200)
       .expect((res) => {
         expect(res.headers['x-auth']).toExist()
@@ -224,7 +223,7 @@ describe('POST /users', () => {
         if (err) return done(err)
 
         // check that user is saved to the database
-        User.findOne({email}).then((user) => {
+        User.findOne({ email }).then((user) => {
           expect(user).toExist()
           expect(user.password).toNotBe(password)
           done()
@@ -239,13 +238,13 @@ describe('POST /users', () => {
 
     request(app)
       .post('/users')
-      .send({email, password})
+      .send({ email, password })
       .expect(400)
       .end((err) => {
         if (err) return done(err)
 
         // check that user is not saved to the database
-        User.findOne({email}).then((user) => {
+        User.findOne({ email }).then((user) => {
           expect(user).toNotExist()
           done()
         })
@@ -258,7 +257,7 @@ describe('POST /users', () => {
 
     request(app)
       .post('/users')
-      .send({email, password})
+      .send({ email, password })
       .expect(400)
       .end(done)
   })
@@ -270,7 +269,7 @@ describe('POST /users/login', () => {
       .post('/users/login')
       .send({
         email: users[1].email,
-        password: users[1].password
+        password: users[1].password,
       })
       .expect(200)
       .expect((res) => {
@@ -282,7 +281,7 @@ describe('POST /users/login', () => {
         User.findById(users[1]._id).then((user) => {
           expect(user.tokens[0]).toInclude({
             access: 'auth',
-            token: res.headers['x-auth']
+            token: res.headers['x-auth'],
           })
           done()
         }).catch(e => done(e))
@@ -294,7 +293,7 @@ describe('POST /users/login', () => {
       .post('/users/login')
       .send({
         email: users[1].email,
-        password: users[1].password + '1'
+        password: `${users[1].password  }1`,
       })
       .expect(400)
       .expect((res) => {
@@ -306,8 +305,26 @@ describe('POST /users/login', () => {
         User.findById(users[1]._id).then((user) => {
           // expect token length === 0
           expect(user.tokens.length).toBe(0)
-        done()
-      }).catch(e => done(e))
-    })
+          done()
+        }).catch(e => done(e))
+      })
+  })
+})
+
+describe('DELETE /users/me/token', () => {
+  it('should remove auth token on logout', (done) => {
+    request(app)
+      .delete('/users/me/token') // DELETE /users/me/token
+      .set('x-auth', users[0].tokens[0].token) // Set x-auth equal to token
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err)
+
+        // Find user, verify that length tokens array is 0  
+        User.findById(users[0]._id).then((user) => {
+          expect(user.tokens.length).toBe(0)
+          done()
+        }).catch(e => done(e))
+      })
   })
 })

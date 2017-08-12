@@ -10,5 +10,6 @@ module.exports = {
     semi: 0,
     "no-unused-vars": ["warn", { "vars": "local" }],
     "no-shadow": ["error", { "builtinGlobals": false, "hoist": "functions", "allow": [] }],
+    "no-underscore-dangle": ["error", { "allow": ["_id"] }]
   }
 };
