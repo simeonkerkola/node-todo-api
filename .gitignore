@@ -115,3 +115,4 @@ typings/
 .env
 
 .DS_Store
+server/config/config.json
